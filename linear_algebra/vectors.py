@@ -52,3 +52,11 @@ class Vector(object):
 				raise Exception('Cannot compute an angle with the zero vector')
 			else:
 				raise e
+
+	def is_parallel(self,v):
+		return self.dot_product(v) == (self.magnitude()*v.magnitude())
+
+	def is_orthoganal(self, v):
+		return self.dot_product(v) == 0
+
+
