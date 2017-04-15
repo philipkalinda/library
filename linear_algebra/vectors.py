@@ -25,16 +25,30 @@ class Vector(object):
 		return Vector([x-y for x,y in zip(self.coordinates, v.coordinates)])
 
 	def times_scalar(self, scalar):
-		new_coordinates = [scalar * x for x in self.coordinates]
-		return Vector(new_coordinates)
+		return Vector([scalar * x for x in self.coordinates])
 
 	def magnitude(self):
 		return (sum([x**2 for x in self.coordinates]))**0.5
 
-	def direction(self):
+	def normalize(self):
 		try:
-			magnitude = self.magnitude()
-			return self.times_scalar((1/magnitude))
-			
+			return self.times_scalar((1/self.magnitude()))
+
 		except ZeroDivisionError:
 			raise Exception('Cannot mormalize the zero vector')
+
+	def dot_product(self, v):
+		return sum([x*y for x,y in zip(self.coordinates, v.coordinates)])
+
+	def angle(self, v, in_degrees = False):
+		from numpy import arccos
+		try:
+			if in_degrees:
+				return 57.2957795*(arccos(self.normalize().dot_product(v.normalize())))
+			else:
+				return arccos(self.normalize().dot_product(v.normalize()))
+		except Exception as e:
+			if str(e) == self.CANNOT_NORMALIZE_SERO_VECTOR_MSG:
+				raise Exception('Cannot compute an angle with the zero vector')
+			else:
+				raise e
