@@ -32,4 +32,9 @@ class Vector(object):
 		return (sum([x**2 for x in self.coordinates]))**0.5
 
 	def direction(self):
-		return self.times_scalar((1/self.magnitude()))
+		try:
+			magnitude = self.magnitude()
+			return self.times_scalar((1/magnitude))
+			
+		except ZeroDivisionError:
+			raise Exception('Cannot mormalize the zero vector')
