@@ -46,3 +46,6 @@ class Stats():
 
 	def confidence_interval_95(x,sample_size):
 		return tuple([(Stats.mean(x)-(1.96*Stats.standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(1.96*Stats.standard_error_of_mean(x,sample_size)))])
+
+	def confidence_interval_99(x,sample_size):
+		return tuple([(Stats.mean(x)-(2.575*Stats.standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(2.575*Stats.standard_error_of_mean(x,sample_size)))])
