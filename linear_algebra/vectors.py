@@ -53,10 +53,17 @@ class Vector(object):
 			else:
 				raise e
 
-	def is_parallel(self,v):
+	def is_zero(self, tolerance = 1e-10):
+		return self.magnitude() < tolerance
+
+	def is_parallel(self,v, tolerance=1e-10):
+		return ( self.is_zero() or
+			v.is_zero() or
+			self.angle(v) == 0 or
+			(self.angle(v) - 3.141592653589)<tolerance)
 		return self.dot_product(v) == (self.magnitude()*v.magnitude())
 
-	def is_orthoganal(self, v):
-		return self.dot_product(v) == 0
+	def is_orthoganal(self, v, tolerance = 1e-10):
+		return self.dot_product(v) < tolerance
 
 
