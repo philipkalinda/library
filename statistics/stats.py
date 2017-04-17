@@ -45,71 +45,61 @@ class Stats():
 		return (value-Stats.mean(x))/Stats.standard_deviation(x)
 
 
-	def one_sample_standard_error_of_mean(x,sample_size):
+	def one_sample_standard_error_of_mean(x):
 		"""x = list of means
-		sample_size = size of samples to calculate means in list "x"
 		"""
-		return Stats.standard_deviation(x, sample=True) / sample_size
+		return Stats.standard_deviation(x, sample=True) / (len(x)**0.5)
 
 
-	def confidence_interval_95(x,sample_size):
+	def confidence_interval_95(x):
 		"""x = list of values (sample)
-		sample_size = size of samples to calculate means in list "x"
 		"""
-		return tuple([(Stats.mean(x)-(1.96*Stats.one_sample_standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(1.96*Stats.one_sample_standard_error_of_mean(x,sample_size)))])
+		return tuple([(Stats.mean(x)-(1.96*Stats.one_sample_standard_error_of_mean(x))), (Stats.mean(x)+(1.96*Stats.one_sample_standard_error_of_mean(x)))])
 
 
-	def confidence_interval_99(x,sample_size):
+	def confidence_interval_99(x):
 		"""x = list of values (sample)
-		sample_size = size of samples to calculate means in list "x"
 		"""
-		return tuple([(Stats.mean(x)-(2.575*Stats.one_sample_standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(2.575*Stats.one_sample_standard_error_of_mean(x,sample_size)))])
+		return tuple([(Stats.mean(x)-(2.575*Stats.one_sample_standard_error_of_mean(x))), (Stats.mean(x)+(2.575*Stats.one_sample_standard_error_of_mean(x)))])
 
 
-	def one_sample_t_score(x, mu, sample_size):
+	def one_sample_t_score(x, mu):
 		"""x = list of values (sample)
 		mu = population mean
-		sample_size = size of samples to calculate means in list "x"
 		"""
-		return (Stats.mean(x) - mu) / Stats.one_sample_standard_error_of_mean(x,sample_size)
+		return (Stats.mean(x) - mu) / Stats.one_sample_standard_error_of_mean(x)
 
 
 	def cohens_d(x, mu):
 		"""x = list of values (sample)
 		mu = population mean
-		sample_size = size of samples to calculate means in list "x"
 		Explination: How far two means are in standard units
 		"""
 		return (Stats.mean(x) - mu) / Stats.standard_deviation(x, sample=True)
 
 
-	def one_sample_r_squared(x, mu, sample_size):
+	def one_sample_r_squared(x, mu):
 		"""x = list of values (sample)
 		mu = population mean
-		sample_size = size of samples to calculate means in list "x"
 		Explination: Proportion of variance related to another variable
 		"""
-		return (Stats.one_sample_t_score(x, mu,sample_size))**2 / ((Stats.one_sample_t_score(x, mu,sample_size)**2)+(len(x)-1))
+		return (Stats.one_sample_t_score(x, mu,sample_size))**2 / ((Stats.one_sample_t_score(x, mu)**2)+(len(x)-1))
 
 
-	def two_sample_standard_error_of_mean(x,y,ssx,ssy):
+	def two_sample_standard_error_of_mean(x,y):
 		"""x = list of means
 		y = list of means
-		ssx = size of samples to calculate means in list "x"
-		ssy = size of samples to calculate means in list "x"
 		"""
 		return ((Stats.variance(x,sample=True)/len(x))+(Stats.variance(y,sample=True)/len(y)))**0.5
 
 
-	def two_sample_t_score(x,y,x_mu,y_mu,ssx,ssy):
+	def two_sample_t_score(x,y,x_mu,y_mu):
 		"""x = list of means
 		y = list of means
 		x_mu = population mean from which x came from
 		y_mu = population mean from which y came from
-		ssx = size of samples to calculate means in list "x"
-		ssy = size of samples to calculate means in list "x"
 		"""
-		return ((Stats.mean(x)-Stats.mean(y)) - (x_mu-y_mu)) / Stats.two_sample_standard_error_of_mean(x,y,ssx,ssy)
+		return ((Stats.mean(x)-Stats.mean(y)) - (x_mu-y_mu)) / Stats.two_sample_standard_error_of_mean(x,y)
 
 
 
