@@ -6,11 +6,13 @@ class Stats():
 	def mean(x):
 		return sum(x) / len(x)
 
+
 	def median(x):
 		if len(x) % 2 != 0:
 			return sorted(list(x))[int((len(x)+1)/2)]
 		else:
 			return sum(sorted(list(x))[int((len(x)/2)):int((len(x)/2)+2)])/2
+
 
 	def mode(x):
 		mode_val = 0; mode_count = 0;
@@ -20,8 +22,10 @@ class Stats():
 				mode_val = i
 		return mode_val
 
+
 	def sum_squares(x):
 		return sum([(i-Stats.mean(x))**2 for i in x])
+
 
 	def variance(x, sample=False):
 		if sample:
@@ -29,23 +33,67 @@ class Stats():
 		else:	
 			return Stats.sum_squares(x)/len(x)
 
+
 	def standard_deviation(x, sample=False):
 		if sample:
 			return Stats.variance(x, sample=True) ** 0.5	
 		else:
 			return Stats.variance(x) ** 0.5
 
+
 	def z_score(value, x):
 		return (value-Stats.mean(x))/Stats.standard_deviation(x)
+
 
 	def standard_error_of_mean(x,sample_size):
 		"""x = list of means
 		sample_size = size of samples to calculate means in list "x"
 		"""
-		return Stats.standard_deviation(x, sample=False) / sample_size
+		return Stats.standard_deviation(x, sample=True) / sample_size
+
 
 	def confidence_interval_95(x,sample_size):
+		"""x = list of values (sample)
+		sample_size = size of samples to calculate means in list "x"
+		"""
 		return tuple([(Stats.mean(x)-(1.96*Stats.standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(1.96*Stats.standard_error_of_mean(x,sample_size)))])
 
+
 	def confidence_interval_99(x,sample_size):
+		"""x = list of values (sample)
+		sample_size = size of samples to calculate means in list "x"
+		"""
 		return tuple([(Stats.mean(x)-(2.575*Stats.standard_error_of_mean(x,sample_size))), (Stats.mean(x)+(2.575*Stats.standard_error_of_mean(x,sample_size)))])
+
+
+	def t_score(x, mu, sample_size):
+		"""x = list of values (sample)
+		mu = population mean
+		sample_size = size of samples to calculate means in list "x"
+		"""
+		return (Stats.mean(x) - mu) / Stats.standard_error_of_mean(x,sample_size)
+
+
+	def cohens_d(x, mu):
+		"""x = list of values (sample)
+		mu = population mean
+		sample_size = size of samples to calculate means in list "x"
+		Explination: How far two means are in standard units
+		"""
+		return (Stats.mean(x) - mu) / Stats.standard_deviation(x, sample=True)
+
+
+	def r_squared(x, mu, sample_size):
+		"""x = list of values (sample)
+		mu = population mean
+		sample_size = size of samples to calculate means in list "x"
+		Explination: Proportion of variance related to another variable
+		"""
+		return (Stats.t_score(x, mu,sample_size))**2 / ((Stats.t_score(x, mu,sample_size)**2)+(len(x)-1))
+
+
+
+
+
+
+
