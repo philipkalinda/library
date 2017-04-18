@@ -102,6 +102,19 @@ class Stats():
 		return ((Stats.mean(x)-Stats.mean(y)) - (x_mu-y_mu)) / Stats.two_sample_standard_error_of_mean(x,y)
 
 
+	def f_score(X):
+		"""X = list of lists of values
+		xg = Stats.mean([Stats.mean(x) for x in X])
+		ssb = sum([len(k)*((Stats.mean(k)-xg)**2) for k in X])
+		ssw = sum([sum([(i-Stats.mean(k))**2 for i in k]) for k in X])
+		dfb = len(X)-1
+		dfw = sum([len(k) for k in X])-len(X)
+		result = ((ssb)/(dfb)) / ((ssw)/(dfw))
+		"""
+		return ((sum([len(k)*((Stats.mean(k)-(Stats.mean([Stats.mean(x) for x in X])))**2) for k in X]))/(len(X)-1)) / ((sum([sum([(i-Stats.mean(k))**2 for i in k]) for k in X]))/(sum([len(k) for k in X])-len(X)))
+
+
+
 
 
 
