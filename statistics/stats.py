@@ -104,6 +104,7 @@ class Stats():
 
 	def f_score(X):
 		"""X = list of lists of values
+		calculated within the function:
 		xg = Stats.mean([Stats.mean(x) for x in X])
 		ssb = sum([len(k)*((Stats.mean(k)-xg)**2) for k in X])
 		ssw = sum([sum([(i-Stats.mean(k))**2 for i in k]) for k in X])
