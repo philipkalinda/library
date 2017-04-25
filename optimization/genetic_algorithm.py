@@ -2,6 +2,7 @@
 
 # This genetic algorithm is used to select the best features within a standard regression model with the optimzation function focusing on maximizing the r2 value and minimizing the mean p-values
 
+#Required Imports
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
