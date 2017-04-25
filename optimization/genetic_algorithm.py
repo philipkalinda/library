@@ -30,7 +30,7 @@ def genetic_algorithm(xdata, ydata, mutation_rate=0.001, iterations=10):
             mean_pvalues.append(np.mean(results.pvalues))
             scores.append(score)
         fitness = [x/sum(scores) for x in scores]
-        end = time.time()
+        end = time.time() #Time Edit Note - Change the time location
         
         #################################################################################
         print('\tTime Taken: {}'.format(end-st))
