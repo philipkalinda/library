@@ -57,10 +57,10 @@ def genetic_algorithm(xdata, ydata, mutation_rate=0.001, iterations=10):
                 new_dna1 = pool[0][:random_split_point]+dna[random_split_point:]
                 new_dna2 = dna[:random_split_point]+pool[0][random_split_point:]
                 for idx,chromosome in enumerate(new_dna1):
-                    if np.random.random() <0.001:
+                    if np.random.random() <mutation_rate:
                         new_dna1[idx] = 1 if chromosome==0 else 0
                 for idx,chromosome in enumerate(new_dna2):
-                    if np.random.random() <0.001:
+                    if np.random.random() <mutation_rate:
                         new_dna2[idx] = 1 if chromosome==0 else 0
                 new_pool.append(new_dna1)
                 new_pool.append(new_dna2)
