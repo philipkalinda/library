@@ -33,6 +33,9 @@ class Stats():
 		else:	
 			return Stats.sum_squares(x)/len(x)
 
+	def covariance(x,y):
+		return sum([(xi - np.mean(x))*(yi - np.mean(y)) for xi,yi in zip(x,y)]) / (((len(x)+len(y))/2)-1)
+
 
 	def standard_deviation(x, sample=False):
 		if sample:
