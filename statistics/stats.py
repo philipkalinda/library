@@ -118,6 +118,20 @@ class Stats():
 		return ((sum([len(k)*((Stats.mean(k)-(Stats.mean([Stats.mean(x) for x in X])))**2) for k in X]))/(len(X)-1)) / ((sum([sum([(i-Stats.mean(k))**2 for i in k]) for k in X]))/(sum([len(k) for k in X])-len(X)))
 
 
+	def correlation(x,y):
+		"""Relationship between two lists
+		x,y = lists of values
+		"""
+		return Stats.covariance(x,y) / (Stats.standard_deviation(x)*Stats.standard_deviation(y))
+
+
+	def one_x_regression(x,y):
+		"""One X value for regression calculation
+		returns slope, y_intercept
+		"""
+		return (Stats.correlation(x,y)*(Stats.standard_deviation(y) / Stats.standard_deviation(x))), (np.mean(y) - ((Stats.correlation(x,y)*(Stats.standard_deviation(y) / Stats.standard_deviation(x)))*np.mean(x)))
+
+
 
 
 
