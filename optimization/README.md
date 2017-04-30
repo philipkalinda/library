@@ -1,3 +1,3 @@
-### Optimization
+# Optimization
 
 Optimiszation algorithms hosted

@@ -2,7 +2,9 @@
 
 # This genetic algorithm is used to select the best features within a standard regression model with the optimzation function focusing on maximizing the r2 value and minimizing the mean p-values
 
+#Required Imports
 import numpy as np
+import pandas as pd
 import statsmodels.api as sm
 
 
@@ -30,7 +32,7 @@ def genetic_algorithm(xdata, ydata, mutation_rate=0.001, iterations=10):
             mean_pvalues.append(np.mean(results.pvalues))
             scores.append(score)
         fitness = [x/sum(scores) for x in scores]
-        end = time.time()
+        end = time.time() #Time Edit Note - Change the time location
         
         #################################################################################
         print('\tTime Taken: {}'.format(end-st))
@@ -57,10 +59,10 @@ def genetic_algorithm(xdata, ydata, mutation_rate=0.001, iterations=10):
                 new_dna1 = pool[0][:random_split_point]+dna[random_split_point:]
                 new_dna2 = dna[:random_split_point]+pool[0][random_split_point:]
                 for idx,chromosome in enumerate(new_dna1):
-                    if np.random.random() <0.001:
+                    if np.random.random() <mutation_rate:
                         new_dna1[idx] = 1 if chromosome==0 else 0
                 for idx,chromosome in enumerate(new_dna2):
-                    if np.random.random() <0.001:
+                    if np.random.random() <mutation_rate:
                         new_dna2[idx] = 1 if chromosome==0 else 0
                 new_pool.append(new_dna1)
                 new_pool.append(new_dna2)
