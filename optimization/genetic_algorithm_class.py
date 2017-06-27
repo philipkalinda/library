@@ -27,6 +27,7 @@ class FeatureSelectionGeneticAlgorithm():
     def results(self):
         """Print best results from the fit
         """
+        # return iterations_results[str(self.iterations+1)]['pool'][0]
         return self.pool[0]
         pass
 
