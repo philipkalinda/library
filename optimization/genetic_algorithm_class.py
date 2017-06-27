@@ -6,6 +6,8 @@
 import numpy as np
 import time
 from sklearn.model_selection import cross_val_score, KFold
+from sklearn.metrics import accuracy_score, r2_score
+from sklearn.decomposition import PCA
 
 
 class FeatureSelectionGeneticAlgorithm():
@@ -31,14 +33,14 @@ class FeatureSelectionGeneticAlgorithm():
         return self.pool[0]
         pass
 
-    def fit(self, model, _type, X, y):
+    def fit(self, model, _type, X, y, cv=True, pca=False):
         """model = sci-kit learn regression/classification model
         X = X input data
         y = Y output data
         """
         # reset data in case run before (iterations_results hoted as a class variable and must be reset when refitting the Algorithm)
 
-        # __init__(self.mutation_rate, self.iterations, self.pool_size)
+        self.__init__(self.mutation_rate, self.iterations, self.pool_size)
         
         X = np.array(X)
         self.pool = np.random.randint(0,2,(self.pool_size, X.shape[1]))
@@ -50,11 +52,22 @@ class FeatureSelectionGeneticAlgorithm():
                 chosen_idx = [idx for bit, idx in zip(dna,range(X.shape[1])) if bit==1]
                 adj_X = X[:,chosen_idx]
 
+                if pca==True:
+                    # add cumalative sum with pca.explained_variance_ratio_
+                    ######### DEVELOPMENT PENDING ########
+                    adj_X = PCA(n_components=4).fit_transform(adj_X)
+
                 if _type == 'regression':
-                    score = np.mean(cross_val_score(model, adj_X, y, scoring='r2', cv=self.kf))
+                    if cv==True:
+                        score = np.mean(cross_val_score(model, adj_X, y, scoring='r2', cv=self.kf))
+                    else:
+                        score = r2_score(y, model.fit(adj_X,y).predict(adj_X))
 
                 elif _type == 'classification':
-                    score = np.mean(cross_val_score(model, adj_X, y, scoring='accuracy', cv=self.kf))
+                    if cv==True:
+                        score = np.mean(cross_val_score(model, adj_X, y, scoring='accuracy', cv=self.kf))
+                    else:
+                        score = accuracy_score(y, model.fit(adj_X,y).predict(adj_X))
 
                 scores.append(score)
             fitness = [x/sum(scores) for x in scores]
@@ -86,7 +99,8 @@ class FeatureSelectionGeneticAlgorithm():
                 self.pool = new_pool
             else:
                 continue
-            e_t = time.time()
-            print('Iteration {} Complete [Time Taken: {} Seconds]'.format(iteration,round(e_t-s_t,2) ))
+            if iteration % 10 == 0:
+                e_t = time.time()
+                print('Iteration {} Complete [Time Taken For Last Iteration: {} Seconds]'.format(iteration,round(e_t-s_t,2)))
         
     
