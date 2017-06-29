@@ -1,80 +1,127 @@
-# Method for genetic algorithm
-
-# This genetic algorithm is used to select the best features within a standard regression model with the optimzation function focusing on maximizing the r2 value and minimizing the mean p-values
-
 #Required Imports
 import numpy as np
-import pandas as pd
-import statsmodels.api as sm
+import time
+from sklearn.model_selection import cross_val_score, KFold
+from sklearn.metrics import accuracy_score, r2_score
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 
-def genetic_algorithm(xdata, ydata, mutation_rate=0.001, iterations=10):    
-    pool = [[np.random.randint(0,2) for genes in range(2000)] for dna in range(50)]
-    iterations_results = {}
+class FeatureSelectionGeneticAlgorithm():
+    """
+    Built to be compatible with sci-kit learn library for both regression and classification models
+    This is designed to help with feature selection in highly dimensional datasets
+    """
+
+    def __init__(self, mutation_rate = 0.001, iterations = 100, pool_size = 50):
+        self.mutation_rate = mutation_rate
+        self.iterations = iterations
+        self.pool_size = pool_size
+        self.pool = np.array([])
+        self.iterations_results = {}
+        self.kf = KFold(n_splits=5)
+
+
+    def results(self):
+        """
+        Print best results from the fit
+        """
+
+        return (self.pool[0], [idx for idx, gene in enumerate(self.pool[0]) if gene==1])
+
+
+    def plot_progress(self):
+        """
+        Plots the progress of the genetic algorithm
+        """
+
+        avs = [np.mean(self.iterations_results[str(x)]['scores']) for x in range(1,101)]
+        avs0 = [np.mean(self.iterations_results[str(x)]['scores'][0]) for x in range(1,101)]
+        plt.plot(avs, label='Pool Average Score')
+        plt.plot(avs0, label='Best Solution Score')
+        plt.legend()
+        plt.show()
+
+
+    def fit(self, model, _type, X, y, cv=True, pca=False):
+        """
+        model = sci-kit learn regression/classification model
+        X = X input data
+        y = Y output data corresponding to X
+        cv = True/False for cross-validation
+        pca = True/False for principal component analysis
+        """
+
+        self.__init__(self.mutation_rate, self.iterations, self.pool_size)
+        
+        is_array = False
+
+        try:
+            X = np.array(X)
+            is_array = True
+        except:
+            continue
+
+        self.pool = np.random.randint(0,2,(self.pool_size, X.shape[1]))
+
+        for iteration in range(1,self.iterations+1):
+            s_t = time.time()
+            scores = list(); fitness = list(); 
+            for chromosome in self.pool:
+                chosen_idx = [idx for gene, idx in zip(chromosome, range(X.shape[1])) if gene==1]
+
+                if is_array==True: 
+                    adj_X = X[:,chosen_idx]
+                elif is_array==False:
+                    adj_X = X.iloc[:,chosen_idx]
+                    pca==False
+
+
+                if pca==True:
+                    adj_X = PCA(n_components=np.where(np.cumsum(PCA(n_components=adj_X.shape[1]).fit(adj_X).explained_variance_ratio_)>0.99)[0][0]+1).fit_transform(adj_X)
+
+                if _type == 'regression':
+                    if cv==True:
+                        score = np.mean(cross_val_score(model, adj_X, y, scoring='r2', cv=self.kf))
+                    else:
+                        score = r2_score(y, model.fit(adj_X,y).predict(adj_X))
+
+                elif _type == 'classification':
+                    if cv==True:
+                        score = np.mean(cross_val_score(model, adj_X, y, scoring='accuracy', cv=self.kf))
+                    else:
+                        score = accuracy_score(y, model.fit(adj_X,y).predict(adj_X))
+
+                scores.append(score)
+            fitness = [x/sum(scores) for x in scores]
+
+            fitness, self.pool, scores = (list(t) for t in zip(*sorted(zip(fitness, [list(l) for l in list(self.pool)], scores),reverse=True)))
+            self.iterations_results['{}'.format(iteration)] = dict()
+            self.iterations_results['{}'.format(iteration)]['fitness'] = fitness
+            self.iterations_results['{}'.format(iteration)]['pool'] = self.pool
+            self.iterations_results['{}'.format(iteration)]['scores'] = scores
+
+            self.pool = np.array(self.pool)
+
+            if iteration != self.iterations+1:
+                new_pool = []
+                for chromosome in self.pool[1:int((len(self.pool)/2)+1)]:
+                    random_split_point = np.random.randint(1,len(chromosome))
+                    next_gen1 = np.concatenate((self.pool[0][:random_split_point], chromosome[random_split_point:]), axis = 0)
+                    next_gen2 = np.concatenate((chromosome[:random_split_point], self.pool[0][random_split_point:]), axis = 0)
+                    for idx, gene in enumerate(next_gen1):
+                        if np.random.random() < self.mutation_rate:
+                            next_gen1[idx] = 1 if gene==0 else 0
+                    for idx, gene in enumerate(next_gen2):
+                        if np.random.random() < self.mutation_rate:
+                            next_gen2[idx] = 1 if gene==0 else 0
+                    new_pool.append(next_gen1)
+                    new_pool.append(next_gen2)
+                self.pool = new_pool
+            else:
+                continue
+            if iteration % 10 == 0:
+                e_t = time.time()
+                print('Iteration {} Complete [Time Taken For Last Iteration: {} Seconds]'.format(iteration,round(e_t-s_t,2)))
+        
     
-    for iteration in range(1,iterations+1):
-        print('Epoch {}:'.format(iteration))
-        st  = time.time()
-        
-        #################################################################################
-        scores = list(); r_squared_adj = list(); mean_pvalues = list(); fitness = list()
-        
-        for dna in pool:
-            chosen_cols = [col for identity,col in zip(dna,xdata.iloc[:,20:].columns.tolist()) if identity ==1]
-            X = pd.concat([xdata.iloc[:,:20],xdata.loc[:,chosen_cols]],axis=1)
-            
-            sm_X_data = sm.add_constant(X)
-            results = sm.OLS(ydata,sm_X_data).fit()
-            
-            score = results.rsquared_adj / np.mean(results.pvalues)
-            
-            r_squared_adj.append(results.rsquared_adj)
-            mean_pvalues.append(np.mean(results.pvalues))
-            scores.append(score)
-        fitness = [x/sum(scores) for x in scores]
-        end = time.time() #Time Edit Note - Change the time location
-        
-        #################################################################################
-        print('\tTime Taken: {}'.format(end-st))
-        print('\tBest Score: {}'.format(max(scores)))
-        print('\tBest r2: {}'.format(r_squared_adj[scores.index(max(scores))]))
-        print('\tBest mean pvalues: {}'.format(mean_pvalues[scores.index(max(scores))]))
-        
-        #################################################################################
-        fitness, pool, scores, r_squared_adj, mean_pvalues = (list(t) for t in zip(*sorted(zip(fitness, pool, scores, r_squared_adj, mean_pvalues),reverse=True)))
-        
-        #################################################################################
-        iterations_results['{}'.format(iteration)] = dict()
-        iterations_results['{}'.format(iteration)]['fitness'] = fitness
-        iterations_results['{}'.format(iteration)]['pool'] = pool
-        iterations_results['{}'.format(iteration)]['scores'] = scores
-        iterations_results['{}'.format(iteration)]['r_squared_adj'] = r_squared_adj
-        iterations_results['{}'.format(iteration)]['mean_pvalues'] = mean_pvalues
-        
-        #################################################################################
-        if iteration != iterations+1:
-            new_pool = []
-            for dna in pool[1:int((len(pool)/2)+1)]:
-                random_split_point = np.random.randint(1,len(dna))
-                new_dna1 = pool[0][:random_split_point]+dna[random_split_point:]
-                new_dna2 = dna[:random_split_point]+pool[0][random_split_point:]
-                for idx,chromosome in enumerate(new_dna1):
-                    if np.random.random() <mutation_rate:
-                        new_dna1[idx] = 1 if chromosome==0 else 0
-                for idx,chromosome in enumerate(new_dna2):
-                    if np.random.random() <mutation_rate:
-                        new_dna2[idx] = 1 if chromosome==0 else 0
-                new_pool.append(new_dna1)
-                new_pool.append(new_dna2)
-            pool = new_pool.copy()
-        else:
-            print('Genetic Algorithm Complete')
-        
-        #################################################################################
-        
-    best_cols = [col for identity,col in zip(pool[0],xdata.iloc[:,20:].columns.tolist()) if identity ==1]
-    best_X = pd.concat([xdata.iloc[:,:20],xdata.loc[:,best_cols]],axis=1)
-    sm_X_data = sm.add_constant(best_X)
-    best_results = sm.OLS(Y_c_data,sm_X_data).fit()
-        
-    return iterations_results, pool[0], best_cols, best_X, best_results
